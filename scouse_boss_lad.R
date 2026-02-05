@@ -16,6 +16,10 @@ estats_fighters <- read_csv(here("Fighters Stats.csv"))
 historico_peleas <- read_csv(here("Fights.csv"))
 
 
+# ---- configuramos una semilla para garantizar reproductibilidad ----
+
+set.seed(123)
+
 # ---- limpiamos los datos ----
 
 # primero generamos la base con los datos de las peleas de manera histórica 
@@ -88,8 +92,8 @@ summary(log_model_final)
 # sacamos los datos específicos para los peleadores que queremos
 
 pelea_estimar <- estats_fighters %>% 
-  filter(id_peleador %in% c("e1248941344b3288",
-                            "f166e93d04a8c274")) %>% 
+  filter(peleador %in% c("Alexander Volkanovski",
+                            "Diego Lopes")) %>% 
   clean_names()
 
 # generamos la diferencia de estadísticas entre ambos
