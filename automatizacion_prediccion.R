@@ -8,13 +8,29 @@
 # Es necesario tener instalado en el directorio de trabajo las bases de datos 
 # de estadísticas de peleador e histórico de peleas, pueden encontrarse en kaggle
 
-# ---- Cargamos las librerías necesarias para ejecutar la función ----
+# ---- 1. Cargamos las librerías necesarias para ejecutar la función ----
 
 install.packages(pacman)
 library(pacman)
 p_load(here, tidyverse, MASS, ciTools, janitor)
 
+# --- 2. funciones auxiliares -----
+# en construcción: vamos a crear una función auxiliar a la función principal
+# para hacer más rápida la diferencia del rendimiento, además de arreglar el 
+# bug de determinar las probabilidades a partir de los peleadores y no de su 
+# posición
 
+calcular_diferencias <- function(df_estats, px_1, px_2){
+  
+  idx_p1 <- which(df_stats$peleador == px_1)
+  idx_p2 <- which(df_stats$peleador == px_2)
+  
+  
+}
+
+
+
+# ---- 3. función principal para la automatización ----
 
 ufc_predict <- function(){
 
@@ -52,42 +68,40 @@ ufc_predict <- function(){
            peleador = `Full Name`,
            apodo = Nickname)
   
+  # limpiamos los nombres sucios y seleccionamos las variables que nos interesan
   
   estats_fighters <- estats_fighters %>% 
-    dplyr::select("peleador","apodo","id_peleador","KD", "STR",
-                  "TD","SUB","Ctrl", "Sub. Att","Sig. Str. %",
-                  "KO Rate","Clinch_%", "DEC Rate")
+    clean_names() %>% 
+    dplyr::select("peleador","apodo","id_peleador","kd", "str",
+                  "td","sub","ctrl", "sub_att","sig_str_percent",
+                  "ko_rate","clinch_percent", "dec_rate")
   
   # un pequeño merge para completar la base final
   
   datos_entrenamiento <- datos_ent %>% 
     left_join(estats_fighters, by = c("id_peleador1" = "id_peleador")) %>% 
-    rename_with(~paste0(., "p_1"), .cols = KD:`DEC Rate`)
+    rename_with(~paste0(., "p_1"), .cols = kd:dec_rate)
   
   datos_entrenamiento <- datos_entrenamiento %>% 
     left_join(estats_fighters, by = c("id_peleador2" = "id_peleador")) %>% 
-    rename_with(~paste0(., "p_2"), .cols = KD:`DEC Rate`)
+    rename_with(~paste0(., "p_2"), .cols = kd:dec_rate)
   
   # generamos las diferencias con las que vamos a estimar los datos 
-  
-  
   
   datos_entrenamiento <- datos_entrenamiento %>% 
     mutate(
       gana_p1 = ifelse(resultado1 == "W", 1, 0),
-      diff_kd = KDp_1 - KDp_2,
-      diff_str = STRp_1 - STRp_2,
-      diff_td = TDp_1 - TDp_2,
-      diff_sub = SUBp_1 - SUBp_2,
-      diff_ctrl = Ctrlp_1 - Ctrlp_2,
-      diff_sigstr = `Sig. Str. %p_1` - `Sig. Str. %p_2`,
-      diff_clinch = `Clinch_%p_1` - `Clinch_%p_2`,
-      diff_ko = `KO Ratep_1` - `KO Ratep_2`,
-      diff_dec_rate = `DEC Ratep_1` - `DEC Ratep_2`
+      diff_kd = kdp_1 - kdp_2,
+      diff_str = strp_1 - strp_2,
+      diff_td = tdp_1 - tdp_2,
+      diff_sub = subp_1 - subp_2,
+      diff_ctrl = ctrlp_1 - ctrlp_2,
+      diff_sigstr = sig_str_percentp_1 - sig_str_percentp_2,
+      diff_clinch = clinch_percentp_1 - clinch_percentp_2,
+      diff_ko = ko_ratep_1 - ko_ratep_2,
+      diff_dec_rate = dec_ratep_1 - dec_ratep_2
     ) %>% 
     filter(!is.na(diff_str))
-  
-  
   
   # ajustamos el modelo logístico para los datos de entrenamiento
   
