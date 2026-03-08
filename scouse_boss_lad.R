@@ -92,8 +92,8 @@ summary(log_model_final)
 # sacamos los datos específicos para los peleadores que queremos
 
 pelea_estimar <- estats_fighters %>% 
-  filter(peleador %in% c("Alexander Volkanovski",
-                            "Diego Lopes")) %>% 
+  filter(peleador %in% c("Max Holloway",
+                            "Charles Oliveira")) %>% 
   clean_names()
 
 # generamos la diferencia de estadísticas entre ambos
@@ -112,7 +112,7 @@ prob_estimada<- predict(log_model_final,
                       datos_predict,
                       type = "response")
 
-print(paste0("Probabilidad de que gane Diego Lopes: ", round(prob_estimada * 100, 2), "%"))
+print(paste0("Probabilidad de que gane Max Holloway: ", round(prob_estimada * 100, 2), "%"))
 
 
 # AUC// confusion matrix // Curva ROC
